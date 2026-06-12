@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KEIRIN AI 予想 — 競輪機械学習予想プラットフォーム</title>
+  <meta name="description" content="LightGBM LambdaRankランキング学習による競輪AI予想。本日の全レース予想・ライン構成・推奨買い目・バックテスト実績を静的配信。">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <h1 class="logo">🚴 KEIRIN <span>AI</span> 予想</h1>
+      <p class="tagline">LightGBM LambdaRank ランキング学習モデル</p>
+    </div>
+  </header>
+
+  <nav class="venue-nav container" id="venue-nav"></nav>
+
+  <main class="container">
+    <section class="stats-band" id="stats-band"></section>
+
+    <div class="layout">
+      <section class="race-area" id="race-area">
+        <p class="loading">データを読み込んでいます…</p>
+      </section>
+
+      <aside class="sidebar">
+        <section class="panel" id="backtest-panel"></section>
+        <section class="panel" id="importance-panel"></section>
+        <section class="panel disclaimer">
+          <h3>ご利用上の注意</h3>
+          <p>本サイトの予想は機械学習モデルによる参考情報であり、的中を保証するものではありません。車券の購入は自己責任で、20歳以上の方のみ可能です。</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p id="footer-meta"></p>
+      <p>アーキテクチャ: データ取得 → ライン特徴量生成 → LambdaRank推論 → バックテスト → 静的配信（ゼロサーバーコスト構成）</p>
+    </div>
+  </footer>
+
+  <script src="data/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

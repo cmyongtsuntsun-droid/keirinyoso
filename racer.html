@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>選手分析 — KEIRIN AI 予想</title>
+  <meta name="description" content="競輪選手の個別分析。ライン役割別成績・バンク周長別成績・決まり手・直近成績をデータで可視化。">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <h1 class="logo"><a href="index.html" class="logo-link">🚴 KEIRIN <span>AI</span> 予想</a></h1>
+      <p class="tagline">選手個別分析</p>
+    </div>
+  </header>
+
+  <nav class="container racer-toolbar">
+    <a href="index.html" class="back-link">← 本日の予想に戻る</a>
+    <div class="racer-search">
+      <input type="text" id="racer-search-input" list="racer-list"
+             placeholder="選手名・登録番号で検索">
+      <datalist id="racer-list"></datalist>
+    </div>
+  </nav>
+
+  <main class="container" id="racer-main">
+    <p class="loading">選手データを読み込んでいます…</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p id="footer-meta"></p>
+      <p>本ページの予想・統計は機械学習モデルによる参考情報です。車券の購入は20歳以上・自己責任で。</p>
+    </div>
+  </footer>
+
+  <script src="data/racers.js"></script>
+  <script src="js/racer.js"></script>
+</body>
+</html>
