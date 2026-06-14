@@ -44,8 +44,18 @@ body {
 .logo span { color: var(--accent2); }
 .tagline { color: var(--text-dim); font-size: 0.85rem; }
 
+/* 日付タブ (本日起点の1週間) */
+.date-nav { display: flex; gap: 6px; margin: 18px auto 0; flex-wrap: wrap; }
+.date-tab {
+  padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--bg-card); color: var(--text-dim); cursor: pointer;
+  font-size: 0.85rem; transition: all .15s;
+}
+.date-tab:hover { border-color: var(--accent2); color: var(--text); }
+.date-tab.active { background: var(--accent2); color: #04121f; font-weight: 700; }
+
 /* 会場タブ */
-.venue-nav { display: flex; gap: 8px; margin: 18px auto 6px; flex-wrap: wrap; }
+.venue-nav { display: flex; gap: 8px; margin: 10px auto 6px; flex-wrap: wrap; }
 .venue-tab {
   padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border);
   background: var(--bg-panel); color: var(--text); cursor: pointer;

@@ -29,13 +29,31 @@
     });
   }
 
+  /* 予想対象日のリストへ正規化 (週間 {days:[...]} / 単日 {date,venues} 両対応) */
+  var DAYS = (DATA.predictions && DATA.predictions.days)
+    ? DATA.predictions.days
+    : [DATA.predictions];
+  var activeDay = 0;      // 表示中の日付インデックス
+  var activeVenue = 0;    // 表示中の会場インデックス
+
+  var WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
+  function fmtDate(iso) {
+    var parts = String(iso).split("-");
+    if (parts.length !== 3) { return iso; }
+    var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+    return (+parts[1]) + "/" + (+parts[2]) + "(" + WEEKDAYS[d.getDay()] + ")";
+  }
+
+  function currentDay() { return DAYS[activeDay]; }
+
   /* ---- 統計バンド ---- */
   function renderStats() {
     var bt = DATA.backtest;
-    var nRaces = DATA.predictions.venues.reduce(function (a, v) { return a + v.races.length; }, 0);
+    var day = currentDay();
+    var nRaces = day.venues.reduce(function (a, v) { return a + v.races.length; }, 0);
     var cards = [
-      { v: DATA.predictions.date, l: "予想対象日" },
-      { v: nRaces + "R", l: "本日の予想レース数" },
+      { v: fmtDate(day.date), l: "予想対象日" },
+      { v: nRaces + "R", l: "この日の予想レース数" },
       { v: bt.win_hit_rate + "%", l: "1着的中率 (検証)" },
       { v: bt.sanrentan_hit_rate + "%", l: "3連単的中率 (検証)" },
       { v: bt.recovery_rate + "%", l: "3連単回収率 (検証)" }
@@ -46,18 +64,40 @@
     }).join("");
   }
 
+  /* ---- 日付タブ (本日起点の1週間) ---- */
+  function renderDateNav() {
+    var nav = document.getElementById("date-nav");
+    if (!nav || DAYS.length <= 1) { if (nav) { nav.style.display = "none"; } return; }
+    nav.innerHTML = DAYS.map(function (d, i) {
+      var label = i === 0 ? "本日 " + fmtDate(d.date) : fmtDate(d.date);
+      return '<button class="date-tab' + (i === activeDay ? " active" : "") +
+        '" data-idx="' + i + '">' + esc(label) + "</button>";
+    }).join("");
+    nav.querySelectorAll(".date-tab").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        activeDay = +btn.dataset.idx;
+        activeVenue = 0;
+        renderDateNav();
+        renderStats();
+        renderVenueNav();
+        renderRaces();
+      });
+    });
+  }
+
   /* ---- 会場タブ ---- */
-  function renderVenueNav(activeIdx) {
+  function renderVenueNav() {
     var nav = document.getElementById("venue-nav");
-    nav.innerHTML = DATA.predictions.venues.map(function (v, i) {
-      return '<button class="venue-tab' + (i === activeIdx ? " active" : "") +
+    nav.innerHTML = currentDay().venues.map(function (v, i) {
+      return '<button class="venue-tab' + (i === activeVenue ? " active" : "") +
         '" data-idx="' + i + '">' + esc(v.venue_name) +
         ' <small>' + v.bank_length + "m</small></button>";
     }).join("");
     nav.querySelectorAll(".venue-tab").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        renderVenueNav(+btn.dataset.idx);
-        renderRaces(+btn.dataset.idx);
+        activeVenue = +btn.dataset.idx;
+        renderVenueNav();
+        renderRaces();
       });
     });
   }
@@ -116,8 +156,8 @@
       "</tbody></table>" + betChips(race.bets) + "</div></article>";
   }
 
-  function renderRaces(venueIdx) {
-    var venue = DATA.predictions.venues[venueIdx];
+  function renderRaces() {
+    var venue = currentDay().venues[activeVenue];
     var area = document.getElementById("race-area");
     area.innerHTML = venue.races.map(function (r, i) { return raceCard(r, i === 0); }).join("");
     area.querySelectorAll(".race-header").forEach(function (h) {
@@ -154,9 +194,10 @@
   }
 
   /* ---- 初期化 ---- */
+  renderDateNav();
   renderStats();
-  renderVenueNav(0);
-  renderRaces(0);
+  renderVenueNav();
+  renderRaces();
   renderBacktest();
   renderImportance();
   document.getElementById("footer-meta").textContent =
