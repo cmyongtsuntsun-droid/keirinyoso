@@ -177,6 +177,78 @@ tr.pred-2 { background: rgba(66,165,245,.10); }
 
 .disclaimer p { font-size: 0.75rem; color: var(--text-dim); }
 
+/* ===== エンゲージメント強化UI ===== */
+/* 冒頭サマリー (このサイト/このページでわかること) */
+.summary-box {
+  background: linear-gradient(120deg, rgba(41,182,246,.10), rgba(255,202,40,.06));
+  border: 1px solid var(--border); border-left: 4px solid var(--accent);
+  border-radius: 10px; padding: 14px 18px; margin: 16px 0 6px;
+}
+.summary-box strong { color: var(--accent); font-size: 0.95rem; display: block; margin-bottom: 6px; }
+.summary-box ul { margin: 0; padding-left: 1.2em; }
+.summary-box li { font-size: 0.85rem; color: var(--text); margin: 3px 0; }
+.summary-box a { color: var(--accent); text-decoration: none; }
+.summary-box a:hover { text-decoration: underline; }
+
+/* セクション見出し */
+.section-title { font-size: 1.05rem; margin: 16px 0 10px; color: var(--accent2); }
+
+/* 本日のAI注目レース TOP */
+.featured-band { margin: 6px 0 18px; }
+.featured-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;
+}
+.featured-card {
+  display: flex; align-items: center; gap: 10px; text-align: left;
+  background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 12px; cursor: pointer; color: var(--text); transition: all .15s;
+}
+.featured-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
+.featured-rank {
+  flex: none; width: 26px; height: 26px; line-height: 26px; text-align: center;
+  border-radius: 50%; background: var(--accent2); color: #04121f; font-weight: 800;
+  font-size: 0.85rem;
+}
+.featured-main { flex: 1; font-size: 0.82rem; line-height: 1.4; }
+.featured-main small { color: var(--accent2); }
+.featured-pick { color: var(--text-dim); }
+.featured-prob { flex: none; font-weight: 800; color: var(--accent); font-size: 1.05rem; }
+
+/* レース並び替えツールバー */
+.race-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.rt-label { font-size: 0.78rem; color: var(--text-dim); }
+.rt-chip {
+  padding: 4px 12px; border-radius: 16px; border: 1px solid var(--border);
+  background: var(--bg-card); color: var(--text-dim); cursor: pointer; font-size: 0.8rem;
+}
+.rt-chip:hover { border-color: var(--accent); }
+.rt-chip.active { background: var(--accent); color: #04121f; font-weight: 700; }
+
+/* AI解説 (予想根拠) */
+.race-comment {
+  margin-top: 12px; padding: 10px 14px; background: var(--bg-card);
+  border: 1px solid var(--border); border-left: 3px solid var(--accent2); border-radius: 8px;
+}
+.race-comment h4 { font-size: 0.78rem; color: var(--accent2); margin-bottom: 4px; }
+.race-comment p { font-size: 0.85rem; color: var(--text); line-height: 1.7; }
+
+/* AI分析コメントパネル */
+.analysis-panel { border-left: 4px solid var(--accent2); }
+.analysis-text { font-size: 0.9rem; line-height: 1.8; color: var(--text); }
+
+/* 関連選手 (回遊) */
+.related-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;
+}
+.related-card {
+  display: block; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px; text-decoration: none; color: var(--text);
+  transition: all .15s;
+}
+.related-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.related-name { font-weight: 700; font-size: 0.9rem; }
+.related-card small { display: block; color: var(--text-dim); font-size: 0.72rem; margin-top: 4px; }
+
 /* フッター */
 .site-footer {
   margin-top: 36px; padding: 22px 0; border-top: 1px solid var(--border);

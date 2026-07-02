@@ -35,6 +35,9 @@
     : [DATA.predictions];
   var activeDay = 0;      // 表示中の日付インデックス
   var activeVenue = 0;    // 表示中の会場インデックス
+  var raceSort = "no";    // レースの並び替え ("no"=レース順 / "conf"=AI信頼度順)
+
+  var STYLE_DESC = { "逃": "先行", "両": "自在", "追": "追い込み" };
 
   var WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
   function fmtDate(iso) {
@@ -45,6 +48,75 @@
   }
 
   function currentDay() { return DAYS[activeDay]; }
+
+  /* レースの本命(予測1位)のエントリを返す */
+  function axisEntry(race) {
+    return race.entries.slice().sort(function (a, b) {
+      return a.pred_rank - b.pred_rank;
+    })[0];
+  }
+
+  /* ---- 本日のAI注目レース TOP (今見る理由・回遊導線) ---- */
+  function renderFeatured() {
+    var el = document.getElementById("featured-band");
+    if (!el) { return; }
+    var list = [];
+    currentDay().venues.forEach(function (v, vi) {
+      v.races.forEach(function (r, ri) {
+        list.push({ vi: vi, ri: ri, venue: v.venue_name,
+          race_no: r.race_no, grade: r.grade, ax: axisEntry(r) });
+      });
+    });
+    list.sort(function (a, b) { return b.ax.win_prob - a.ax.win_prob; });
+    list = list.slice(0, 5);
+    if (!list.length) { el.innerHTML = ""; return; }
+    el.innerHTML = '<h2 class="section-title">🔥 本日のAI注目レース TOP' + list.length +
+      "</h2><div class=\"featured-grid\">" + list.map(function (f, i) {
+        return '<button class="featured-card" data-vi="' + f.vi + '" data-ri="' + f.ri +
+          '"><span class="featured-rank">' + (i + 1) + "</span>" +
+          '<span class="featured-main"><b>' + esc(f.venue) + " " + f.race_no +
+          'R</b> <small>' + esc(f.grade) + "</small><br>" +
+          '<span class="featured-pick">◎' + f.ax.car_no + " " + esc(f.ax.racer_name) +
+          "</span></span>" +
+          '<span class="featured-prob">' + f.ax.win_prob.toFixed(1) + "%</span></button>";
+      }).join("") + "</div>";
+    el.querySelectorAll(".featured-card").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        activeVenue = +btn.dataset.vi;
+        raceSort = "no";
+        renderVenueNav();
+        renderRaces();
+        var cards = document.querySelectorAll("#race-area .race-card");
+        var target = cards[+btn.dataset.ri];
+        if (target) {
+          target.classList.add("open");
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
+  }
+
+  /* レースのAI解説テキスト (予想根拠・滞在時間向上) */
+  function raceComment(race) {
+    var sorted = race.entries.slice().sort(function (a, b) { return a.pred_rank - b.pred_rank; });
+    var ax = sorted[0];
+    var sub = sorted[1];
+    var styleDesc = STYLE_DESC[ax.style] || ax.style;
+    var txt = "AIは" + ax.car_no + "番 " + esc(ax.racer_name) + "(" + esc(ax.klass) +
+      "・" + styleDesc + ")を本命◎に評価。AI勝率は" + ax.win_prob.toFixed(1) + "%。";
+    if (ax.back_count) {
+      txt += "バック回数(B)" + ax.back_count + "回とラインを牽引する近況で、主導権争いの軸。";
+    }
+    if (sub) {
+      txt += "相手本線は" + sub.car_no + "番 " + esc(sub.racer_name) +
+        "を中心に、ライン構成「" + esc(race.line_disp) + "」の流れに注目。";
+    }
+    return txt;
+  }
+
+  function raceCommentBlock(race) {
+    return '<div class="race-comment"><h4>AI解説</h4><p>' + raceComment(race) + "</p></div>";
+  }
 
   /* ---- 統計バンド ---- */
   function renderStats() {
@@ -77,8 +149,10 @@
       btn.addEventListener("click", function () {
         activeDay = +btn.dataset.idx;
         activeVenue = 0;
+        raceSort = "no";
         renderDateNav();
         renderStats();
+        renderFeatured();
         renderVenueNav();
         renderRaces();
       });
@@ -153,16 +227,33 @@
       "<th>2連<br>対率</th><th>脚質</th><th>B</th><th>位置</th><th>AI勝率</th>" +
       "</tr></thead><tbody>" +
       race.entries.map(entryRow).join("") +
-      "</tbody></table>" + betChips(race.bets) + "</div></article>";
+      "</tbody></table>" + raceCommentBlock(race) + betChips(race.bets) +
+      "</div></article>";
   }
 
   function renderRaces() {
     var venue = currentDay().venues[activeVenue];
     var area = document.getElementById("race-area");
-    area.innerHTML = venue.races.map(function (r, i) { return raceCard(r, i === 0); }).join("");
+    var races = venue.races.slice();
+    if (raceSort === "conf") {
+      races.sort(function (a, b) { return axisEntry(b).win_prob - axisEntry(a).win_prob; });
+    }
+    var toolbar = '<div class="race-toolbar"><span class="rt-label">並び替え</span>' +
+      '<button class="rt-chip' + (raceSort === "no" ? " active" : "") +
+      '" data-sort="no">レース順</button>' +
+      '<button class="rt-chip' + (raceSort === "conf" ? " active" : "") +
+      '" data-sort="conf">AI信頼度順</button></div>';
+    area.innerHTML = toolbar +
+      races.map(function (r, i) { return raceCard(r, i === 0); }).join("");
     area.querySelectorAll(".race-header").forEach(function (h) {
       h.addEventListener("click", function () {
         h.parentElement.classList.toggle("open");
+      });
+    });
+    area.querySelectorAll(".rt-chip").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        raceSort = btn.dataset.sort;
+        renderRaces();
       });
     });
   }
@@ -196,6 +287,7 @@
   /* ---- 初期化 ---- */
   renderDateNav();
   renderStats();
+  renderFeatured();
   renderVenueNav();
   renderRaces();
   renderBacktest();

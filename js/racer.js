@@ -80,7 +80,7 @@
         esc(c.role),
         c.starts + "走 / 1着率" + c.win_rate + "%", c.top2_rate, Math.max(maxRate, 1));
     }).join("");
-    return '<section class="panel"><h3>ライン役割別 2連対率</h3>' + bars + "</section>";
+    return '<section class="panel" id="role"><h3>ライン役割別 2連対率</h3>' + bars + "</section>";
   }
 
   /* 決まり手内訳 (逃げ/捲り/差し/マーク) */
@@ -104,7 +104,7 @@
         "</td><td>" + b.win_rate.toFixed(1) + "%</td><td>" +
         b.top2_rate.toFixed(1) + "%</td></tr>";
     }).join("");
-    return '<section class="panel"><h3>バンク周長別成績</h3>' +
+    return '<section class="panel" id="bank"><h3>バンク周長別成績</h3>' +
       '<table class="entries"><thead><tr><th>周長</th><th>出走</th>' +
       "<th>1着率</th><th>2連対率</th></tr></thead><tbody>" + rows +
       "</tbody></table></section>";
@@ -132,12 +132,45 @@
         "</span></td><td>" + esc(x.line_role) + "</td><td" + rankCls + ">" +
         x.rank + "着</td></tr>";
     }).join("");
-    return '<section class="panel"><h3>直近10走</h3>' +
+    return '<section class="panel" id="recent"><h3>直近10走</h3>' +
       '<div class="spark-wrap"><p class="spark-caption">直近20走の着順推移 (右が最新)</p>' +
       rankSparkline(r.recent_ranks) + "</div>" +
       '<table class="entries"><thead><tr><th>日付</th><th>レース</th><th>グレード</th>' +
       "<th>車番</th><th>位置</th><th>着順</th></tr></thead><tbody>" + rows +
       "</tbody></table></section>";
+  }
+
+  /* 冒頭サマリー(このページでわかること)+ 目次 */
+  function summaryBox(r) {
+    return '<section class="summary-box" aria-label="このページでわかること">' +
+      "<strong>このページでわかること</strong><ul>" +
+      '<li><a href="#analysis">' + esc(r.racer_name) + "のAI分析コメント(予想根拠)</a></li>" +
+      '<li><a href="#recent">直近10走の成績推移とスパークライン</a></li>' +
+      '<li><a href="#role">ライン役割別(先頭/番手/三番手/単騎)の成績</a></li>' +
+      '<li><a href="#bank">バンク周長別・会場別の得意条件</a></li>' +
+      '<li><a href="#related">同級班で力が近い関連選手</a></li>' +
+      "</ul></section>";
+  }
+
+  /* AI分析コメント(予想根拠) */
+  function analysisSection(r) {
+    if (!r.analysis) { return ""; }
+    return '<section class="panel analysis-panel" id="analysis"><h3>AI分析コメント</h3>' +
+      '<p class="analysis-text">' + esc(r.analysis) + "</p></section>";
+  }
+
+  /* 同級班の関連選手(内部回遊) */
+  function relatedSection(r) {
+    if (!r.related || !r.related.length) { return ""; }
+    var cards = r.related.map(function (p) {
+      return '<a class="related-card" href="racer/' + p.racer_id + '.html" title="' +
+        esc(p.racer_name) + 'の選手分析へ"><span class="related-name">' +
+        esc(p.racer_name) + ' <span class="klass-' + esc(p.klass) + '">' + esc(p.klass) +
+        "</span></span><small>脚質" + esc(p.style) + " ／ 競走得点" + p.kyoso_tokuten +
+        " ／ 1着率" + p.win_rate + "%</small></a>";
+    }).join("");
+    return '<section class="panel related-panel" id="related"><h3>同級班の関連選手をチェック</h3>' +
+      '<div class="related-grid">' + cards + "</div></section>";
   }
 
   function todaySection(r) {
@@ -167,6 +200,7 @@
       '<p class="dim">登録番号 ' + r.racer_id + " ／ 競走得点 " +
       r.kyoso_tokuten.toFixed(2) + " ／ 直近勝率 " + r.recent_win_rate.toFixed(1) +
       "% ／ バック回数(B) " + r.back_count + "</p></div></section>" +
+      summaryBox(r) +
       '<section class="stats-band">' +
       kpiCard(r.starts, "集計出走数") +
       kpiCard(r.win_rate.toFixed(1) + "%", "1着率") +
@@ -175,10 +209,12 @@
       kpiCard(r.avg_rank.toFixed(2), "平均着順") +
       kpiCard(r.kyoso_tokuten.toFixed(1), "競走得点") +
       "</section>" +
+      analysisSection(r) +
       todaySection(r) +
       '<div class="layout"><div>' + recentSection(r) + "</div>" +
       "<aside>" + roleSection(r) + kimariteSection(r) + bankSection(r) +
-      venueSection(r) + "</aside></div>";
+      venueSection(r) + "</aside></div>" +
+      relatedSection(r);
   }
 
   function findByQuery(q) {
