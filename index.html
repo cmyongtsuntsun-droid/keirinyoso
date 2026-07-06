@@ -85,8 +85,10 @@
     </div>
   </header>
 
-  <nav class="date-nav container" id="date-nav" aria-label="予想対象日"></nav>
-  <nav class="venue-nav container" id="venue-nav"></nav>
+  <div class="sticky-subnav" id="sticky-subnav">
+    <nav class="date-nav container" id="date-nav" aria-label="予想対象日"></nav>
+    <nav class="venue-nav container" id="venue-nav"></nav>
+  </div>
 
   <main class="container">
     <section class="summary-box" aria-label="このサイトでできること">
@@ -127,6 +129,7 @@
   </footer>
 
   <script src="data/data.js"></script>
+  <script src="js/common.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

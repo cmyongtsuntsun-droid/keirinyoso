@@ -118,6 +118,34 @@
     return '<div class="race-comment"><h4>AI解説</h4><p>' + raceComment(race) + "</p></div>";
   }
 
+  /* ---- 共有 / トースト通知 (スマホでの回遊・拡散を後押し) ---- */
+  function showToast(msg) {
+    var t = document.getElementById("app-toast");
+    if (!t) {
+      t = document.createElement("div");
+      t.id = "app-toast";
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(function () { t.classList.remove("show"); }, 1800);
+  }
+
+  function shareRace(venueName, race) {
+    var ax = axisEntry(race);
+    var text = venueName + " " + race.race_no + "R  AI本命◎" + ax.car_no + " " +
+      ax.racer_name + "(AI勝率" + ax.win_prob.toFixed(1) + "%)  #競輪AI予想";
+    var url = location.origin + location.pathname;
+    if (navigator.share) {
+      navigator.share({ title: "KEIRIN AI 予想", text: text, url: url }).catch(function () {});
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text + " " + url).then(function () {
+        showToast("コピーしました");
+      }).catch(function () {});
+    }
+  }
+
   /* ---- 統計バンド ---- */
   function renderStats() {
     var bt = DATA.backtest;
@@ -221,6 +249,7 @@
       '<span class="race-pick">AI本線: <b>' + pick + "</b></span>" +
       '<span class="race-line">ライン: ' + esc(race.line_disp) + "</span>" +
       '<span class="race-cond">' + esc(race.weather) + " / 風" + race.wind_speed + "m</span>" +
+      '<button type="button" class="race-share-btn" title="この予想を共有" aria-label="共有">📤</button>' +
       "</div>" +
       '<div class="race-body"><table class="entries"><thead><tr>' +
       "<th>車番</th><th>AI印</th><th>選手</th><th>競走<br>得点</th><th>直近<br>勝率</th>" +
@@ -242,7 +271,8 @@
       '<button class="rt-chip' + (raceSort === "no" ? " active" : "") +
       '" data-sort="no">レース順</button>' +
       '<button class="rt-chip' + (raceSort === "conf" ? " active" : "") +
-      '" data-sort="conf">AI信頼度順</button></div>';
+      '" data-sort="conf">AI信頼度順</button>' +
+      '<button type="button" class="rt-chip" id="toggle-all-btn">▼ 全レース展開</button></div>';
     area.innerHTML = toolbar +
       races.map(function (r, i) { return raceCard(r, i === 0); }).join("");
     area.querySelectorAll(".race-header").forEach(function (h) {
@@ -250,10 +280,27 @@
         h.parentElement.classList.toggle("open");
       });
     });
-    area.querySelectorAll(".rt-chip").forEach(function (btn) {
+    area.querySelectorAll(".rt-chip[data-sort]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         raceSort = btn.dataset.sort;
         renderRaces();
+      });
+    });
+    var toggleBtn = area.querySelector("#toggle-all-btn");
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", function () {
+        var cards = area.querySelectorAll(".race-card");
+        var anyClosed = Array.prototype.some.call(cards, function (c) {
+          return !c.classList.contains("open");
+        });
+        cards.forEach(function (c) { c.classList.toggle("open", anyClosed); });
+        toggleBtn.textContent = anyClosed ? "▲ 全レース折りたたむ" : "▼ 全レース展開";
+      });
+    }
+    area.querySelectorAll(".race-share-btn").forEach(function (btn, idx) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        shareRace(venue.venue_name, races[idx]);
       });
     });
   }
@@ -282,6 +329,14 @@
           "</span><span>" + f.importance + '%</span></div><div class="imp-bar"><i style="width:' +
           (f.importance / max * 100) + '%"></i></div></div>';
       }).join("");
+  }
+
+  /* ---- スティッキーナビの影 (スクロール追従中であることを示す) ---- */
+  var stickyNav = document.getElementById("sticky-subnav");
+  if (stickyNav) {
+    window.addEventListener("scroll", function () {
+      stickyNav.classList.toggle("is-stuck", window.scrollY > 4);
+    }, { passive: true });
   }
 
   /* ---- 初期化 ---- */

@@ -79,6 +79,9 @@ body {
 /* レイアウト */
 .layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; align-items: start; }
 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+/* グリッドアイテムの既定 min-width:auto によるはみ出し ("grid blowout") 対策。
+   横長テーブルの overflow-x:auto を内側で効かせ、ページ全体の横スクロールを防ぐ。 */
+.layout > * { min-width: 0; }
 
 /* レースカード */
 .race-card {
@@ -312,3 +315,96 @@ td.rank-win { color: var(--win); font-weight: 800; }
 td.rank-top3 { color: var(--accent); font-weight: 700; }
 .today-panel .bet-chip { text-decoration: none; }
 .imp-label small.dim { font-size: 0.66rem; }
+
+/* ===== モバイル最適化 / スマホ向け機能 ===== */
+
+/* 出走表など横長テーブルの横スクロール化 (thead/tbody/tr は既定の
+   table内部表示のまま保持されるため列崩れせず、ページ全体もはみ出さない) */
+@media (max-width: 780px) {
+  table.entries { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.entries::-webkit-scrollbar { height: 5px; }
+  table.entries::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+}
+
+/* スティッキーサブナビ (日付/会場タブ): スクロールしても切替操作を維持 */
+.sticky-subnav {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--bg); padding-top: 6px; margin-bottom: -6px;
+}
+.sticky-subnav.is-stuck { box-shadow: 0 6px 14px rgba(0,0,0,.35); }
+
+/* 上部へ戻るボタン (共通: 全ページで機能) */
+#to-top-btn {
+  position: fixed; right: 16px; bottom: 16px; width: 46px; height: 46px;
+  border-radius: 50%; border: 1px solid var(--border); background: var(--accent);
+  color: #04121f; font-size: 1.25rem; font-weight: 800; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,.4); opacity: 0; pointer-events: none;
+  transform: translateY(12px); transition: opacity .2s, transform .2s; z-index: 60;
+}
+#to-top-btn.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+#to-top-btn:active { transform: scale(0.92); }
+
+/* レースカード共有ボタン */
+.race-share-btn {
+  border: none; background: transparent; color: var(--text-dim); cursor: pointer;
+  font-size: 1rem; padding: 4px 7px; border-radius: 6px; line-height: 1; flex: none;
+}
+.race-share-btn:hover, .race-share-btn:active { background: var(--bg-card); color: var(--accent); }
+
+/* 共有/コピー時のトースト通知 */
+#app-toast {
+  position: fixed; left: 50%; bottom: 78px; transform: translate(-50%, 8px);
+  background: var(--bg-card); color: var(--text); border: 1px solid var(--border);
+  padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; opacity: 0;
+  transition: opacity .2s, transform .2s; pointer-events: none; z-index: 70; white-space: nowrap;
+}
+#app-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 640px) {
+  /* 余白・文字サイズをスマホ画面に合わせて圧縮 */
+  .container { padding: 0 12px; }
+  .site-header { padding: 16px 0; }
+  .logo { font-size: 1.3rem; }
+  .tagline { font-size: 0.72rem; }
+  .panel { padding: 12px; }
+  .summary-box { padding: 12px 14px; margin: 12px 0 6px; }
+
+  .stats-band { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .stat-card { padding: 10px 8px; }
+  .stat-card .value { font-size: 1.2rem; }
+  .stat-card .label { font-size: 0.68rem; }
+
+  .featured-grid { grid-template-columns: 1fr; }
+
+  /* タブ類は折り返さず横スワイプに (縦スペースの節約) */
+  .date-nav, .venue-nav {
+    flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; padding-bottom: 2px;
+  }
+  .date-nav::-webkit-scrollbar, .venue-nav::-webkit-scrollbar { display: none; }
+  .date-tab, .venue-tab { flex: none; }
+
+  /* タップ領域の確保 (44px目安) とタッチフィードバック */
+  .date-tab, .venue-tab { padding: 10px 16px; font-size: 0.88rem; }
+  .rt-chip { padding: 9px 14px; }
+  .date-tab:active, .venue-tab:active, .rt-chip:active,
+  .featured-card:active, .bet-chip:active, .related-card:active,
+  .back-link:active { opacity: 0.65; }
+
+  /* レースヘッダーを2段組みにして読みやすく */
+  .race-header { padding: 12px 40px 12px 14px; position: relative; row-gap: 4px; min-height: 24px; }
+  .race-pick, .race-line, .race-cond { flex: 1 1 100%; margin-left: 0; }
+  .race-cond { order: 4; }
+  .race-header::after {
+    content: "▾"; position: absolute; right: 14px; top: 14px; color: var(--text-dim);
+    transition: transform .15s; pointer-events: none;
+  }
+  .race-card.open .race-header::after { transform: rotate(180deg); }
+
+  .race-toolbar { gap: 6px; }
+
+  /* 選手検索ツールバー: 検索欄を全幅に */
+  .racer-toolbar { gap: 10px; }
+  .racer-search { margin-left: 0; width: 100%; }
+  .racer-search input { width: 100%; }
+}
