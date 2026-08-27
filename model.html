@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIモデル解説 — LambdaRankとライン特徴量の設計 | KEIRIN AI 予想</title>
+  <meta name="description" content="KEIRIN AI 予想が使うLightGBM LambdaRankモデルの解説。着順を段階的評価スコアに変換したランキング学習の仕組み、競輪特有のライン特徴量（先頭/番手/三番手/単騎・ライン人数・ライン先頭のB回数）の設計、全25特徴量の重要度、バックテストの検証条件を公開します。">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://keirinyoso.adult-bank.jp/model.html">
+  <meta name="theme-color" content="#0d1421">
+  <!-- Favicon -->
+  <link rel="icon" href="images/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="images/favicon.ico">
+  <!-- OGP -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="KEIRIN AI 予想">
+  <meta property="og:title" content="AIモデル解説 — LambdaRankとライン特徴量の設計 | KEIRIN AI 予想">
+  <meta property="og:description" content="KEIRIN AI 予想が使うLightGBM LambdaRankモデルの解説。着順を段階的評価スコアに変換したランキング学習の仕組み、競輪特有のライン特徴量（先頭/番手/三番手/単騎・ライン人数・ライン先頭のB回数）の設計、全25特徴量の重要度、バックテストの検証条件を公開します。">
+  <meta property="og:url" content="https://keirinyoso.adult-bank.jp/model.html">
+  <meta property="og:image" content="https://keirinyoso.adult-bank.jp/images/ogp.png">
+  <meta property="og:image:width" content="1731">
+  <meta property="og:image:height" content="909">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AIモデル解説 — LambdaRankとライン特徴量の設計 | KEIRIN AI 予想">
+  <meta name="twitter:description" content="KEIRIN AI 予想が使うLightGBM LambdaRankモデルの解説。着順を段階的評価スコアに変換したランキング学習の仕組み、競輪特有のライン特徴量（先頭/番手/三番手/単騎・ライン人数・ライン先頭のB回数）の設計、全25特徴量の重要度、バックテストの検証条件を公開します。">
+  <meta name="twitter:image" content="https://keirinyoso.adult-bank.jp/images/ogp.png">
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZE52VYWEKQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ZE52VYWEKQ');
+  </script>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "TechArticle", "url": "https://keirinyoso.adult-bank.jp/model.html", "headline": "競輪AI予想モデルの設計 — LambdaRankとライン特徴量", "description": "KEIRIN AI 予想が使うLightGBM LambdaRankモデルの解説。着順を段階的評価スコアに変換したランキング学習の仕組み、競輪特有のライン特徴量（先頭/番手/三番手/単騎・ライン人数・ライン先頭のB回数）の設計、全25特徴量の重要度、バックテストの検証条件を公開します。", "inLanguage": "ja", "isPartOf": {"@type": "WebSite", "name": "KEIRIN AI 予想", "url": "https://keirinyoso.adult-bank.jp/"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://keirinyoso.adult-bank.jp/"}, {"@type": "ListItem", "position": 2, "name": "AIモデル解説", "item": "https://keirinyoso.adult-bank.jp/model.html"}]}]}</script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <h1 class="logo"><a href="index.html" class="logo-link">🚴 KEIRIN <span>AI</span> 予想</a></h1>
+      <p class="tagline">AIモデル解説</p>
+    </div>
+  </header>
+
+  <nav class="container racer-toolbar" aria-label="パンくず">
+    <a href="index.html" class="back-link">← 本日の予想</a>
+    <a href="racer.html" class="back-link">選手検索</a>
+    <a href="glossary.html" class="back-link">競輪用語集</a>
+    <a href="faq.html" class="back-link">よくある質問</a>
+  </nav>
+
+  <main class="container">
+    <article class="racer-profile">
+      <div class="racer-head">
+        <h2>AIモデル解説 — LambdaRank とライン特徴量</h2>
+        <p class="dim">LightGBM LambdaRank (NDCG@1-3最適化) ／
+          全25特徴量 ／ 全国43競輪場対応</p>
+      </div>
+    </article>
+
+    <section class="summary-box" aria-label="このページでわかること">
+      <strong>このページでわかること</strong>
+      <ul>
+        <li><a href="#rank">なぜ「着順予測」ではなくランキング学習なのか</a></li>
+        <li><a href="#line">競輪特有のライン特徴量をどう設計しているか</a></li>
+        <li><a href="#importance">どの特徴量が効いているか（Gain 寄与率）</a></li>
+        <li><a href="#backtest">バックテストの条件と、その限界</a></li>
+      </ul>
+    </section>
+
+    <section class="panel" id="rank">
+      <h2>ランキング学習としての競輪予想</h2>
+      <p>競輪で知りたいのは「その選手が何秒で走るか」ではなく
+        「同じレースの中で誰が上位に来るか」です。そこで本モデルは、各選手の着順を
+        <strong>1着=5 / 2着=4 / 3着=3 / 4着=2 / 5着=1 / 6着以下=0</strong> の
+        段階的評価スコアに変換し、レースをひとつのグループとして
+        LightGBM の LambdaRank で学習させています。評価指標は NDCG@1-3、
+        つまり上位3着の並びの正確さを直接最適化しています。</p>
+      <p>推論時はレース内スコアを softmax で正規化して「AI勝率」として表示し、
+        スコア順に◎○▲△✕注の印を割り当てます。推奨買い目は予測1位を軸に固定し、
+        上位4車の組み合わせから信頼度上位を提示しています。</p>
+    </section>
+
+    <section class="panel" id="line">
+      <h2>ライン特徴量の設計</h2>
+      <p>競輪が競馬や競艇と決定的に違うのは、レースがライン単位の連携で動くことです。
+        個々の能力値だけを並べたモデルでは「強い先行選手の番手にいる追込型」を
+        正しく評価できません。そこで隊列の情報を次の6項目に分解して与えています。</p>
+      <table class="entries"><thead><tr><th>特徴量</th><th>意味</th><th>設計意図</th></tr></thead><tbody><tr><td><code>is_line_head</code></td><td>ライン先頭</td><td>ライン先頭かどうか。風圧を受け続ける不利と、主導権を握れば押し切れる有利の両面を学習させる。</td></tr><tr><td><code>is_second</code></td><td>番手</td><td>番手かどうか。先頭の風よけを受けられるため、同じ実力なら連対率が上がることをモデルが捉える。</td></tr><tr><td><code>is_third</code></td><td>三番手</td><td>三番手かどうか。3着圏内に押し上げられやすい位置。</td></tr><tr><td><code>is_solo</code></td><td>単騎</td><td>単騎かどうか。風よけを得られない不利を表す。</td></tr><tr><td><code>line_size</code></td><td>ライン人数</td><td>所属ラインの人数。人数が多いほど隊列を維持しやすい。</td></tr><tr><td><code>line_head_b</code></td><td>ライン先頭のB回数</td><td>自ライン先頭選手のバック回数(B)。「強い先行選手のラインにいるか」を数値化した、競輪特有のライン強度指標。</td></tr></tbody></table>
+      <p>役割フラグは排他的（どの選手も必ず1つだけ1になる）で、
+        ライン人数と実際の所属者数が一致することをテストで検証しています。
+        用語の意味は<a href="glossary.html">競輪用語集</a>を参照してください。</p>
+    </section>
+
+    <section class="panel" id="importance">
+      <h2>特徴量重要度（Gain 寄与率）</h2>
+      <p>学習済みモデルにおける各特徴量の Gain を正規化したものです。
+        上位12件を掲載しています。</p>
+      <table class="entries"><thead><tr><th>順位</th><th>特徴量</th><th>カラム名</th><th>Gain 寄与率</th></tr></thead><tbody><tr><td>1</td><td>競走得点</td><td><code>kyoso_tokuten</code></td><td>78.64%</td></tr><tr><td>2</td><td>級班</td><td><code>class_code</code></td><td>8.44%</td></tr><tr><td>3</td><td>競輪場</td><td><code>venue_id</code></td><td>2.89%</td></tr><tr><td>4</td><td>風速</td><td><code>wind_speed</code></td><td>1.26%</td></tr><tr><td>5</td><td>ライン先頭のB回数</td><td><code>line_head_b</code></td><td>1.25%</td></tr><tr><td>6</td><td>直近3連対率</td><td><code>recent_3rate</code></td><td>1.17%</td></tr><tr><td>7</td><td>直近2連対率</td><td><code>recent_2rate</code></td><td>0.88%</td></tr><tr><td>8</td><td>車番</td><td><code>car_no</code></td><td>0.86%</td></tr><tr><td>9</td><td>直線距離</td><td><code>straight_length</code></td><td>0.71%</td></tr><tr><td>10</td><td>直近勝率</td><td><code>recent_win_rate</code></td><td>0.66%</td></tr><tr><td>11</td><td>レース番号</td><td><code>race_no</code></td><td>0.53%</td></tr><tr><td>12</td><td>逃げ回数</td><td><code>nige_count</code></td><td>0.41%</td></tr></tbody></table>
+    </section>
+
+    <section class="panel" id="backtest">
+      <h2>バックテストの条件</h2>
+      <p>「3連単の本命1点買い（予測1位→2位→3位）を全レースで機械的に購入する」
+        という単純な戦略で検証した結果です。1レースあたり100円投資として計算しています。</p>
+      <h3>バックテスト実績</h3><div class="kpi-row"><span>検証レース数</span><b>864R</b></div><div class="kpi-row"><span>1着的中率</span><b>56.1%</b></div><div class="kpi-row"><span>2連単的中率</span><b>28.8%</b></div><div class="kpi-row"><span>3連単的中率</span><b>13.9%</b></div><div class="kpi-row"><span>3連単回収率</span><b>103.9%</b></div><div class="kpi-row"><span>投資/回収</span><b>86,400円 / 89,730円</b></div><p class="dim">バックテストはシミュレーション生成レースによる検証値であり、実際の払戻実績ではありません。</p>
+      <p><strong>この数値の限界を明記します。</strong>
+        検証に用いたレース結果はシミュレーションで生成したものであり、
+        実際の開催・実際の払戻に基づく成績ではありません。
+        選手マスタ（級班・脚質・競走得点・決まり手回数・バック回数）は
+        KEIRIN.JP の公開情報を取り込んでいますが、レースの着順と払戻は
+        そのデータを基に生成しています。したがって上記の的中率・回収率は
+        モデルの相対的な性能を比較するための指標であり、
+        実運用での収支を保証するものではありません。</p>
+    </section>
+
+    <section class="panel">
+      <h2>パイプライン</h2>
+      <p>データ取得 → ライン特徴量生成 → LambdaRank学習 → 推論 → バックテスト →
+        静的HTML出力（ゼロサーバーコスト構成）。予想本文・選手ページ・
+        開催日別ページはすべてビルド時に静的HTMLとして書き出されます。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>本サイトの予想は機械学習モデルによる参考情報であり、的中を保証するものではありません。車券の購入は20歳以上・自己責任で。</p>
+      <p><a href="index.html" class="back-link">本日の予想</a>
+         <a href="racer.html" class="back-link">選手一覧・検索</a>
+         <a href="glossary.html" class="back-link">競輪用語集</a>
+         <a href="faq.html" class="back-link">よくある質問</a>
+         <a href="model.html" class="back-link">AIモデル解説</a></p>
+    </div>
+  </footer>
+  <script src="js/common.js"></script>
+</body>
+</html>

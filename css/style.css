@@ -408,3 +408,46 @@ td.rank-top3 { color: var(--accent); font-weight: 700; }
   .racer-search { margin-left: 0; width: 100%; }
   .racer-search input { width: 100%; }
 }
+
+/* ===================================================================
+   静的プリレンダリング (build_race_pages.py / build_static_pages.py)
+   タブ・カードを button ではなく <a> で出力するためのリンク解除と、
+   静的ページ専用ブロックの体裁。
+   =================================================================== */
+a.date-tab, a.venue-tab, a.featured-card { text-decoration: none; }
+a.date-tab, a.venue-tab { display: inline-block; }
+
+/* レース見出し (静的レースページのみ) */
+.race-title {
+  font-size: 0.95rem; margin: 0 0 10px; color: var(--accent);
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+
+/* 開催日・会場別リンク一覧 */
+.crawl-section { margin: 28px 0 8px; }
+.crawl-links {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+.crawl-day {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+}
+.crawl-day h3 { font-size: 0.85rem; color: var(--accent2); margin-bottom: 6px; }
+.crawl-day h3 a { color: var(--accent); text-decoration: none; font-size: 0.78rem; }
+.crawl-day ul { margin: 0; padding-left: 1.1em; }
+.crawl-day li { font-size: 0.8rem; margin: 3px 0; }
+.crawl-day a { color: var(--text); text-decoration: none; }
+.crawl-day a:hover { color: var(--accent); text-decoration: underline; }
+
+/* 用語集 / FAQ */
+.panel h2 { font-size: 1rem; color: var(--accent); margin-bottom: 8px; }
+.term { padding: 10px 0; border-top: 1px solid var(--border); }
+.term:first-of-type { border-top: none; }
+.term h3 { font-size: 0.92rem; margin-bottom: 4px; }
+.term p, .faq-item p { font-size: 0.85rem; line-height: 1.8; color: var(--text); }
+.faq-item h2 { font-size: 0.95rem; }
+.panel code {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1px 5px; font-size: 0.78rem;
+}

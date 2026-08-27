@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>よくある質問 — AI印・AI勝率・買い目・データの出典 | KEIRIN AI 予想</title>
+  <meta name="description" content="KEIRIN AI 予想へのよくある質問。AI印とAI勝率の決まり方、ラインの評価方法、推奨買い目の点数、的中率・回収率の算出条件、使用データの出典、更新頻度についてお答えします。">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://keirinyoso.adult-bank.jp/faq.html">
+  <meta name="theme-color" content="#0d1421">
+  <!-- Favicon -->
+  <link rel="icon" href="images/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="images/favicon.ico">
+  <!-- OGP -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="KEIRIN AI 予想">
+  <meta property="og:title" content="よくある質問 — AI印・AI勝率・買い目・データの出典 | KEIRIN AI 予想">
+  <meta property="og:description" content="KEIRIN AI 予想へのよくある質問。AI印とAI勝率の決まり方、ラインの評価方法、推奨買い目の点数、的中率・回収率の算出条件、使用データの出典、更新頻度についてお答えします。">
+  <meta property="og:url" content="https://keirinyoso.adult-bank.jp/faq.html">
+  <meta property="og:image" content="https://keirinyoso.adult-bank.jp/images/ogp.png">
+  <meta property="og:image:width" content="1731">
+  <meta property="og:image:height" content="909">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="よくある質問 — AI印・AI勝率・買い目・データの出典 | KEIRIN AI 予想">
+  <meta name="twitter:description" content="KEIRIN AI 予想へのよくある質問。AI印とAI勝率の決まり方、ラインの評価方法、推奨買い目の点数、的中率・回収率の算出条件、使用データの出典、更新頻度についてお答えします。">
+  <meta name="twitter:image" content="https://keirinyoso.adult-bank.jp/images/ogp.png">
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZE52VYWEKQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ZE52VYWEKQ');
+  </script>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "FAQPage", "url": "https://keirinyoso.adult-bank.jp/faq.html", "name": "よくある質問", "inLanguage": "ja", "mainEntity": [{"@type": "Question", "name": "KEIRIN AI 予想の利用は無料ですか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、すべて無料です。会員登録も不要で、本日から1週間先までの全レースのAI予想（AI印・AI勝率・推奨買い目・ライン構成・AI解説）をそのまま閲覧できます。"}}, {"@type": "Question", "name": "AI印（◎○▲△✕注）はどう決まっていますか？", "acceptedAnswer": {"@type": "Answer", "text": "LightGBM の LambdaRank というランキング学習モデルが、そのレースの出走各選手にスコアを付け、スコア順に◎（本命）○（対抗）▲（単穴）△✕注 の順で機械的に割り当てています。人手による調整は一切入りません。"}}, {"@type": "Question", "name": "「AI勝率」は何を表していますか？", "acceptedAnswer": {"@type": "Answer", "text": "モデルが出力したレース内スコアを softmax で正規化し、そのレースで1着になる確率の近似値として百分率表示したものです。同一レース内の全選手を合計すると100%になります。実際の払戻オッズから逆算した支持率ではありません。"}}, {"@type": "Question", "name": "AIはラインをどう評価しているのですか？", "acceptedAnswer": {"@type": "Answer", "text": "ライン内の役割（先頭・番手・三番手・単騎）をそれぞれ独立したフラグとして持たせ、さらにライン人数（line_size）と自ライン先頭のバック回数（line_head_b）を特徴量に加えています。これによりモデルは「強い先行選手のラインの番手」といった、競輪特有の有利不利を学習できます。詳しくはAIモデル解説ページをご覧ください。"}}, {"@type": "Question", "name": "推奨買い目は何点ですか？", "acceptedAnswer": {"@type": "Answer", "text": "3連単は予測上位4車から軸（予測1位）を固定した組み合わせのうち信頼度上位3点、2連単は2点を提示しています。点数を絞る設計のため、荒れたレースでは外れることも当然あります。"}}, {"@type": "Question", "name": "的中率・回収率はどのように算出していますか？", "acceptedAnswer": {"@type": "Answer", "text": "掲載している的中率・回収率は、シミュレーションで生成した検証用レース群に対して「3連単の本命1点買い」を機械的に適用したバックテストの結果です。実際の開催における払戻実績ではありません。モデルの相対的な性能を測るための指標としてご覧ください。"}}, {"@type": "Question", "name": "どのようなデータを使っていますか？", "acceptedAnswer": {"@type": "Answer", "text": "選手マスタ（氏名・登録番号・級班・脚質・競走得点・決まり手回数・バック回数など）はKEIRIN.JP の公開情報を取り込んでいます。学習・検証に用いるレース結果は、その選手データを基にシミュレーション生成したものです。"}}, {"@type": "Question", "name": "予想はいつ更新されますか？", "acceptedAnswer": {"@type": "Answer", "text": "1日1回のビルドで、本日を起点に1週間分の予想を再生成しています。ページ下部の「データ生成日時」で最終更新を確認できます。"}}, {"@type": "Question", "name": "過去の予想は見られますか？", "acceptedAnswer": {"@type": "Answer", "text": "開催日ごとの予想ページ（/race/日付/）を約120日分アーカイブしています。トップページ下部の「開催日・会場別のAI予想一覧」から辿れます。"}}, {"@type": "Question", "name": "選手ごとの成績は見られますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。出走表の選手名をタップすると、その選手の個別分析ページに移動します。ライン役割別・バンク周長別・会場別の成績、決まり手の構成、直近10走の推移を掲載しています。"}}, {"@type": "Question", "name": "車券はこのサイトで購入できますか？", "acceptedAnswer": {"@type": "Answer", "text": "できません。本サイトは予想情報のみを提供しており、車券の販売や購入代行は一切行っていません。購入は公式の投票サイト等をご利用ください。"}}, {"@type": "Question", "name": "誰でも車券を買えますか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。車券を購入できるのは20歳以上の方に限られます。本サイトの予想は参考情報であり的中を保証するものではありません。車券の購入はご自身の責任でお願いします。"}}]}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://keirinyoso.adult-bank.jp/"}, {"@type": "ListItem", "position": 2, "name": "よくある質問", "item": "https://keirinyoso.adult-bank.jp/faq.html"}]}]}</script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <h1 class="logo"><a href="index.html" class="logo-link">🚴 KEIRIN <span>AI</span> 予想</a></h1>
+      <p class="tagline">よくある質問</p>
+    </div>
+  </header>
+
+  <nav class="container racer-toolbar" aria-label="パンくず">
+    <a href="index.html" class="back-link">← 本日の予想</a>
+    <a href="racer.html" class="back-link">選手検索</a>
+    <a href="glossary.html" class="back-link">競輪用語集</a>
+    <a href="model.html" class="back-link">AIモデル解説</a>
+  </nav>
+
+  <main class="container">
+    <article class="racer-profile">
+      <div class="racer-head">
+        <h2>よくある質問</h2>
+        <p class="dim">全12問 ／ AI予想の仕組みとデータの出典について</p>
+      </div>
+    </article>
+
+    <section class="summary-box" aria-label="質問一覧">
+      <strong>質問一覧</strong>
+      <ul><li><a href="#faq-0">KEIRIN AI 予想の利用は無料ですか？</a></li><li><a href="#faq-1">AI印（◎○▲△✕注）はどう決まっていますか？</a></li><li><a href="#faq-2">「AI勝率」は何を表していますか？</a></li><li><a href="#faq-3">AIはラインをどう評価しているのですか？</a></li><li><a href="#faq-4">推奨買い目は何点ですか？</a></li><li><a href="#faq-5">的中率・回収率はどのように算出していますか？</a></li><li><a href="#faq-6">どのようなデータを使っていますか？</a></li><li><a href="#faq-7">予想はいつ更新されますか？</a></li><li><a href="#faq-8">過去の予想は見られますか？</a></li><li><a href="#faq-9">選手ごとの成績は見られますか？</a></li><li><a href="#faq-10">車券はこのサイトで購入できますか？</a></li><li><a href="#faq-11">誰でも車券を買えますか？</a></li></ul>
+    </section>
+
+    <section class="panel faq-item" id="faq-0"><h2>KEIRIN AI 予想の利用は無料ですか？</h2><p>はい、すべて無料です。会員登録も不要で、本日から1週間先までの全レースのAI予想（AI印・AI勝率・推奨買い目・ライン構成・AI解説）をそのまま閲覧できます。</p></section><section class="panel faq-item" id="faq-1"><h2>AI印（◎○▲△✕注）はどう決まっていますか？</h2><p>LightGBM の LambdaRank というランキング学習モデルが、そのレースの出走各選手にスコアを付け、スコア順に◎（本命）○（対抗）▲（単穴）△✕注 の順で機械的に割り当てています。人手による調整は一切入りません。</p></section><section class="panel faq-item" id="faq-2"><h2>「AI勝率」は何を表していますか？</h2><p>モデルが出力したレース内スコアを softmax で正規化し、そのレースで1着になる確率の近似値として百分率表示したものです。同一レース内の全選手を合計すると100%になります。実際の払戻オッズから逆算した支持率ではありません。</p></section><section class="panel faq-item" id="faq-3"><h2>AIはラインをどう評価しているのですか？</h2><p>ライン内の役割（先頭・番手・三番手・単騎）をそれぞれ独立したフラグとして持たせ、さらにライン人数（line_size）と自ライン先頭のバック回数（line_head_b）を特徴量に加えています。これによりモデルは「強い先行選手のラインの番手」といった、競輪特有の有利不利を学習できます。詳しくはAIモデル解説ページをご覧ください。</p></section><section class="panel faq-item" id="faq-4"><h2>推奨買い目は何点ですか？</h2><p>3連単は予測上位4車から軸（予測1位）を固定した組み合わせのうち信頼度上位3点、2連単は2点を提示しています。点数を絞る設計のため、荒れたレースでは外れることも当然あります。</p></section><section class="panel faq-item" id="faq-5"><h2>的中率・回収率はどのように算出していますか？</h2><p>掲載している的中率・回収率は、シミュレーションで生成した検証用レース群に対して「3連単の本命1点買い」を機械的に適用したバックテストの結果です。実際の開催における払戻実績ではありません。モデルの相対的な性能を測るための指標としてご覧ください。</p></section><section class="panel faq-item" id="faq-6"><h2>どのようなデータを使っていますか？</h2><p>選手マスタ（氏名・登録番号・級班・脚質・競走得点・決まり手回数・バック回数など）はKEIRIN.JP の公開情報を取り込んでいます。学習・検証に用いるレース結果は、その選手データを基にシミュレーション生成したものです。</p></section><section class="panel faq-item" id="faq-7"><h2>予想はいつ更新されますか？</h2><p>1日1回のビルドで、本日を起点に1週間分の予想を再生成しています。ページ下部の「データ生成日時」で最終更新を確認できます。</p></section><section class="panel faq-item" id="faq-8"><h2>過去の予想は見られますか？</h2><p>開催日ごとの予想ページ（/race/日付/）を約120日分アーカイブしています。トップページ下部の「開催日・会場別のAI予想一覧」から辿れます。</p></section><section class="panel faq-item" id="faq-9"><h2>選手ごとの成績は見られますか？</h2><p>はい。出走表の選手名をタップすると、その選手の個別分析ページに移動します。ライン役割別・バンク周長別・会場別の成績、決まり手の構成、直近10走の推移を掲載しています。</p></section><section class="panel faq-item" id="faq-10"><h2>車券はこのサイトで購入できますか？</h2><p>できません。本サイトは予想情報のみを提供しており、車券の販売や購入代行は一切行っていません。購入は公式の投票サイト等をご利用ください。</p></section><section class="panel faq-item" id="faq-11"><h2>誰でも車券を買えますか？</h2><p>いいえ。車券を購入できるのは20歳以上の方に限られます。本サイトの予想は参考情報であり的中を保証するものではありません。車券の購入はご自身の責任でお願いします。</p></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>本サイトの予想は機械学習モデルによる参考情報であり、的中を保証するものではありません。車券の購入は20歳以上・自己責任で。</p>
+      <p><a href="index.html" class="back-link">本日の予想</a>
+         <a href="racer.html" class="back-link">選手一覧・検索</a>
+         <a href="glossary.html" class="back-link">競輪用語集</a>
+         <a href="faq.html" class="back-link">よくある質問</a>
+         <a href="model.html" class="back-link">AIモデル解説</a></p>
+    </div>
+  </footer>
+  <script src="js/common.js"></script>
+</body>
+</html>
