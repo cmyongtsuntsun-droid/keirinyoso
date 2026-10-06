@@ -1,0 +1,31 @@
+Options -Indexes -MultiViews
+DirectoryIndex index.html
+AddDefaultCharset UTF-8
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+RewriteCond %{REQUEST_URI} !^/$
+RewriteCond %{REQUEST_URI} !^/(?:en|zh-cn|zh-tw|ko)/?$
+RewriteCond %{REQUEST_URI} !^/(?:index\.html|racer\.html|faq\.html|glossary\.html|model\.html|robots\.txt|sitemap\.xml|CNAME|indexnow-key\.txt|site-l10n\.js|keirinyoso-i18n\.js|keirinyoso-ui-translations\.json|css/style\.css|js/(?:app|common|racer)\.js|data/(?:data|racers)\.js|images/(?:favicon\.ico|ogp\.png)|race/\d{4}-\d{2}-\d{2}/(?:|index\.html|\d+\.html)|racer/\d+\.html|(?:en|zh-cn|zh-tw|ko)/(?:index\.html|racer\.html|faq\.html|glossary\.html|model\.html|racer/\d+\.html|race/\d{4}-\d{2}-\d{2}/(?:|index\.html|\d+\.html)))$
+RewriteRule ^ - [F,L]
+
+<FilesMatch "(?i)(^\.|\.(?:bak|conf|db|dist|ini|log|old|orig|php|py|sh|sql|sqlite3?|swp|tmp|ya?ml))$">
+  Require all denied
+</FilesMatch>
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  <FilesMatch "\.(?:html)$">
+    Header set Cache-Control "public, max-age=3600, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(?:css|js|png|ico|json)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json application/xml image/svg+xml
+</IfModule>

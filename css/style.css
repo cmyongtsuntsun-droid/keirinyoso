@@ -451,3 +451,9 @@ a.date-tab, a.venue-tab { display: inline-block; }
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: 4px; padding: 1px 5px; font-size: 0.78rem;
 }
+
+
+.official-resource-links { max-width: 1180px; margin: 22px auto; padding: 14px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; color: var(--text-dim); background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; font-size: .82rem; }
+.official-resource-links strong { color: var(--text); }
+.official-resource-links a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 680px) { .official-resource-links { margin: 14px 12px; align-items: flex-start; flex-direction: column; } }
